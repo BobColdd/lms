@@ -1,0 +1,59 @@
+{% extends "layout_app.html" %}
+{% block title %}Announcements{% endblock %}
+{% block page_title %}Announcements{% endblock %}
+
+{% block content %}
+<div class="d-flex align-center justify-between mb-2">
+  <span class="text-muted fs-sm">{{ announcements|length }} announcement(s)</span>
+  <a href="{{ url_for('admin.announcement_new') }}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> New Announcement
+  </a>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:1rem;">
+  {% for ann in announcements %}
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3 style="margin:0;">{{ ann.title }}</h3>
+        <div class="fs-sm text-muted" style="margin-top:.2rem;">
+          <i class="fas fa-user"></i> {{ ann.author.full_name }} &nbsp;&middot;&nbsp;
+          <i class="fas fa-clock"></i> {{ ann.created_at.strftime('%d %b %Y %H:%M') }}
+          {% if ann.course %}
+            &nbsp;&middot;&nbsp;
+            <span class="badge badge-primary"><i class="fas fa-book"></i> {{ ann.course.title }}</span>
+          {% else %}
+            &nbsp;&middot;&nbsp;
+            <span class="badge badge-grey">School-wide</span>
+          {% endif %}
+          {% if ann.is_active %}
+            <span class="badge badge-success" style="margin-left:.3rem;">Active</span>
+          {% else %}
+            <span class="badge badge-grey" style="margin-left:.3rem;">Hidden</span>
+          {% endif %}
+        </div>
+      </div>
+      <form method="POST" action="{{ url_for('admin.announcement_delete', ann_id=ann.id) }}"
+            style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-xs btn-danger"
+                data-confirm="Delete this announcement?">
+          <i class="fas fa-trash"></i>
+        </button>
+      </form>
+    </div>
+    <div class="card-body">
+      <p style="font-size:.9rem;white-space:pre-line;">{{ ann.body }}</p>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state card" style="padding:3rem;">
+    <i class="fas fa-bullhorn"></i>
+    <p>No announcements yet. Create one to notify students.</p>
+    <a href="{{ url_for('admin.announcement_new') }}" class="btn btn-primary btn-sm" style="margin-top:.75rem;">
+      Post First Announcement
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

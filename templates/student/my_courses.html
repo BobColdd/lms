@@ -1,0 +1,66 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}My Courses{% endblock %}
+{% block page_title %}My Courses{% endblock %}
+
+{% block content %}
+{% if enrollments %}
+<div style="display:flex;flex-direction:column;gap:1rem;">
+  {% for enr in enrollments %}
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr auto;gap:1rem;padding:1.1rem 1.25rem;align-items:start;">
+      <div>
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;">
+          <span class="badge badge-primary">{{ enr.course.code }}</span>
+          {{ status_badge(enr.status) }}
+        </div>
+        <h3 style="margin:.1rem 0 .3rem;font-size:1.05rem;">{{ enr.course.title }}</h3>
+        <div class="fs-sm text-muted" style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <span><i class="fas fa-hourglass-half"></i> {{ enr.course.duration_months }} months</span>
+          {% if enr.course.schedule %}<span><i class="fas fa-calendar"></i> {{ enr.course.schedule }}</span>{% endif %}
+          {% if enr.course.instructor %}<span><i class="fas fa-chalkboard-teacher"></i> {{ enr.course.instructor.full_name }}</span>{% endif %}
+          <span><i class="fas fa-calendar-plus"></i> Enrolled {{ enr.enrolled_at.strftime('%d %b %Y') }}</span>
+        </div>
+        {% if enr.status == 'active' %}
+        <div style="margin-top:.75rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:.25rem;">
+            <span class="fs-sm text-muted">Progress</span>
+            <span class="fs-sm fw-bold">{{ enr.progress }}%</span>
+          </div>
+          <div style="height:8px;background:#eaecee;border-radius:50px;overflow:hidden;">
+            <div style="height:100%;width:{{ enr.progress }}%;background:var(--primary);border-radius:50px;transition:width .6s;"></div>
+          </div>
+        </div>
+        {% endif %}
+        {% if enr.status == 'pending' %}
+        <div class="alert alert-warning mt-1" style="margin-top:.75rem;">
+          <i class="fas fa-exclamation-triangle"></i>
+          Enrollment pending — please complete payment of
+          <strong>KES {{ "{:,.0f}".format(enr.course.price) }}</strong> to activate.
+          Contact admin or visit the accounts office.
+        </div>
+        {% endif %}
+      </div>
+      <div style="text-align:right;">
+        <div class="fw-bold" style="color:var(--primary);font-size:1.1rem;">
+          KES {{ "{:,.0f}".format(enr.course.price) }}
+        </div>
+        <div class="fs-sm text-muted">Course fee</div>
+        {% if enr.status == 'completed' and enr.grade %}
+        <div class="badge badge-success" style="margin-top:.4rem;">Grade: {{ enr.grade }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state card" style="padding:3rem;">
+  <i class="fas fa-book"></i>
+  <p>You are not enrolled in any courses yet.</p>
+  <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary btn-sm" style="margin-top:.75rem;">
+    Browse Courses
+  </a>
+</div>
+{% endif %}
+{% endblock %}

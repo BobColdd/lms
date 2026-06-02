@@ -1,0 +1,58 @@
+{% macro render_field(field, placeholder='', hint='') %}
+<div class="form-group">
+  {{ field.label(class='form-label') }}
+  {% if field.type == 'TextAreaField' %}
+    {{ field(class='form-control' + (' error' if field.errors else ''), rows=4, placeholder=placeholder) }}
+  {% elif field.type == 'BooleanField' %}
+    <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;">
+      {{ field() }}
+      <span class="fs-sm">{{ placeholder or 'Yes' }}</span>
+    </label>
+  {% else %}
+    {{ field(class='form-control' + (' error' if field.errors else ''), placeholder=placeholder) }}
+  {% endif %}
+  {% if hint %}<div class="form-hint">{{ hint }}</div>{% endif %}
+  {% for error in field.errors %}
+    <div class="form-error"><i class="fas fa-exclamation-circle"></i> {{ error }}</div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% macro status_badge(status) %}
+{% set map = {
+  'active':    ('badge-success', 'Active'),
+  'pending':   ('badge-warning', 'Pending'),
+  'completed': ('badge-primary', 'Completed'),
+  'dropped':   ('badge-grey',    'Dropped'),
+  'confirmed': ('badge-success', 'Confirmed'),
+  'failed':    ('badge-danger',  'Failed'),
+  'admin':     ('badge-danger',  'Admin'),
+  'instructor':('badge-primary', 'Instructor'),
+  'student':   ('badge-grey',    'Student'),
+} %}
+{% set cls, label = map.get(status, ('badge-grey', status)) %}
+<span class="badge {{ cls }}">{{ label }}</span>
+{% endmacro %}
+
+
+{% macro flash_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% set cls = {
+        'success': 'alert-success',
+        'danger':  'alert-danger',
+        'warning': 'alert-warning',
+        'info':    'alert-info',
+        'error':   'alert-danger',
+      }.get(category, 'alert-info') %}
+      <div class="alert {{ cls }} auto-dismiss" role="alert">
+        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' or category == 'error' %}times-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+        {{ message }}
+        <button class="alert-close" type="button">&times;</button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+{% endmacro %}

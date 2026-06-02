@@ -1,0 +1,40 @@
+{% from "partials/macros.html" import nav_link %}
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand d-flex align-center gap-1">
+    <div class="logo-icon" style="width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.95rem;flex-shrink:0;">SF</div>
+    <div>
+      <div class="logo-text">SFMCC</div>
+      <div class="logo-sub">Kiptere, Kericho</div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    {% if current_user.is_admin() or current_user.is_instructor() %}
+      <div class="sidebar-section-label">Main</div>
+      <a href="{{ url_for('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="{{ url_for('admin.courses') }}"><i class="fas fa-book-open"></i> Courses</a>
+      <a href="{{ url_for('admin.enrollments') }}"><i class="fas fa-user-graduate"></i> Enrollments</a>
+      <a href="{{ url_for('admin.announcements') }}"><i class="fas fa-bullhorn"></i> Announcements</a>
+
+      {% if current_user.is_admin() %}
+        <div class="sidebar-section-label">Management</div>
+        <a href="{{ url_for('admin.users') }}"><i class="fas fa-users"></i> Users</a>
+        <a href="{{ url_for('admin.payments') }}"><i class="fas fa-money-bill-wave"></i> Payments</a>
+        <a href="{{ url_for('admin.categories') }}"><i class="fas fa-tags"></i> Categories</a>
+        <a href="{{ url_for('admin.audit_log') }}"><i class="fas fa-shield-alt"></i> Audit Log</a>
+      {% endif %}
+
+    {% else %}
+      <div class="sidebar-section-label">Main</div>
+      <a href="{{ url_for('student.dashboard') }}"><i class="fas fa-home"></i> Dashboard</a>
+      <a href="{{ url_for('student.browse_courses') }}"><i class="fas fa-search"></i> Browse Courses</a>
+      <a href="{{ url_for('student.my_courses') }}"><i class="fas fa-book-open"></i> My Courses</a>
+      <a href="{{ url_for('student.payments') }}"><i class="fas fa-receipt"></i> Payments</a>
+      <a href="{{ url_for('student.profile') }}"><i class="fas fa-user-circle"></i> Profile</a>
+    {% endif %}
+  </div>
+
+  <div class="sidebar-footer">
+    &copy; {{ SCHOOL_NAME }}
+  </div>
+</nav>

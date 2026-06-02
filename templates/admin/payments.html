@@ -1,0 +1,78 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}Payments{% endblock %}
+{% block page_title %}Payments{% endblock %}
+
+{% block content %}
+<div class="d-flex align-center justify-between mb-2" style="flex-wrap:wrap;gap:.5rem;">
+  <div class="d-flex gap-1">
+    {% for status, label in [('', 'All'), ('pending', 'Pending'), ('confirmed', 'Confirmed'), ('failed', 'Failed')] %}
+    <a href="{{ url_for('admin.payments', status=status) }}"
+       class="btn btn-sm {% if status_filter == status %}btn-primary{% else %}btn-ghost{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <div class="d-flex gap-1 align-center">
+    <span style="font-size:.85rem;color:var(--text-muted);">
+      Confirmed total: <strong style="color:var(--success);">KES {{ "{:,.0f}".format(total) }}</strong>
+    </span>
+    <a href="{{ url_for('admin.payment_new') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-plus"></i> Record Payment
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Amount (KES)</th>
+          <th>Method</th>
+          <th>Reference</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pay in payments %}
+        <tr>
+          <td class="text-muted fs-sm">{{ pay.id }}</td>
+          <td>
+            <div class="fw-bold">{{ pay.student.full_name }}</div>
+            {% if pay.enrollment %}
+              <div class="fs-sm text-muted">{{ pay.enrollment.course.code }}</div>
+            {% endif %}
+          </td>
+          <td class="fw-bold">{{ "{:,.2f}".format(pay.amount) }}</td>
+          <td>
+            <span class="badge {% if pay.method == 'mpesa' %}badge-success{% elif pay.method == 'bank' %}badge-primary{% else %}badge-grey{% endif %}">
+              {{ pay.method.upper() }}
+            </span>
+          </td>
+          <td class="fs-sm text-muted">{{ pay.reference or '—' }}</td>
+          <td>{{ status_badge(pay.status) }}</td>
+          <td class="fs-sm text-muted">{{ pay.created_at.strftime('%d %b %Y') }}</td>
+          <td>
+            {% if pay.status == 'pending' %}
+            <form method="POST" action="{{ url_for('admin.payment_confirm', pay_id=pay.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-xs btn-success confirm-payment-btn" title="Confirm payment">
+                <i class="fas fa-check"></i> Confirm
+              </button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">
+          <div class="empty-state"><i class="fas fa-receipt"></i><p>No payments recorded.</p></div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

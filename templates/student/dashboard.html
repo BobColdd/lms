@@ -1,0 +1,153 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Welcome strip -->
+<div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;border-radius:var(--radius);padding:1.3rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+  <div>
+    <h2 style="color:#fff;margin:0;font-size:1.25rem;">Welcome back, {{ current_user.full_name.split()[0] }}!</h2>
+    <p style="opacity:.8;font-size:.85rem;margin:.2rem 0 0;">{{ SCHOOL_NAME }} &mdash; {{ SCHOOL_LOCATION }}</p>
+  </div>
+  <a href="{{ url_for('student.browse_courses') }}" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);">
+    <i class="fas fa-search"></i> Browse Courses
+  </a>
+</div>
+
+<!-- Stats row -->
+<div class="stat-grid" style="margin-bottom:1.5rem;">
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="fas fa-book-open"></i></div>
+    <div>
+      <div class="stat-value">{{ enrollments|length }}</div>
+      <div class="stat-label">Enrollments</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+    <div>
+      <div class="stat-value">{{ enrollments|selectattr('status','equalto','active')|list|length }}</div>
+      <div class="stat-label">Active Courses</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon gold"><i class="fas fa-receipt"></i></div>
+    <div>
+      <div class="stat-value">{{ payments|length }}</div>
+      <div class="stat-label">Payments</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red"><i class="fas fa-graduation-cap"></i></div>
+    <div>
+      <div class="stat-value">{{ enrollments|selectattr('status','equalto','completed')|list|length }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 320px;gap:1.2rem;">
+
+  <!-- My Courses -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-book-open" style="color:var(--primary);"></i> My Enrollments</h3>
+      <a href="{{ url_for('student.my_courses') }}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    {% if enrollments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Course</th><th>Status</th><th>Progress</th><th>Enrolled</th></tr>
+        </thead>
+        <tbody>
+          {% for enr in enrollments[:6] %}
+          <tr>
+            <td>
+              <div class="fw-bold fs-sm">{{ enr.course.title }}</div>
+              <div style="font-size:.75rem;color:var(--text-muted);">{{ enr.course.code }} &middot; {{ enr.course.duration_months }} months</div>
+            </td>
+            <td>{{ status_badge(enr.status) }}</td>
+            <td>
+              <div style="height:5px;background:#eaecee;border-radius:50px;width:80px;overflow:hidden;">
+                <div style="height:100%;width:{{ enr.progress }}%;background:var(--primary);border-radius:50px;"></div>
+              </div>
+              <span class="fs-sm text-muted">{{ enr.progress }}%</span>
+            </td>
+            <td class="fs-sm text-muted">{{ enr.enrolled_at.strftime('%d %b %Y') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:2rem;">
+      <i class="fas fa-book"></i>
+      <p>You have no enrollments yet.</p>
+      <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary btn-sm" style="margin-top:.75rem;">
+        Browse Courses
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right: announcements + recent payments -->
+  <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+    <!-- Announcements -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-bullhorn" style="color:var(--primary);"></i> Notices</h3>
+      </div>
+      <div class="card-body" style="padding:.75rem;">
+        {% for ann in announcements %}
+        <div style="padding:.55rem 0;border-bottom:1px solid var(--border);">
+          <div class="fw-bold fs-sm">{{ ann.title }}</div>
+          <div class="fs-sm text-muted" style="margin-top:.15rem;">{{ ann.body[:100] }}{% if ann.body|length > 100 %}...{% endif %}</div>
+          <div style="font-size:.73rem;color:var(--text-muted);margin-top:.2rem;">{{ ann.created_at.strftime('%d %b %Y') }}</div>
+        </div>
+        {% else %}
+        <p class="text-muted fs-sm" style="text-align:center;padding:.75rem 0;">No notices at this time.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent payments -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-receipt" style="color:var(--primary);"></i> Recent Payments</h3>
+        <a href="{{ url_for('student.payments') }}" class="btn btn-outline btn-sm">All</a>
+      </div>
+      <div class="card-body" style="padding:.75rem;">
+        {% for pay in payments %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div class="fw-bold fs-sm">KES {{ "{:,.0f}".format(pay.amount) }}</div>
+            <div style="font-size:.73rem;color:var(--text-muted);">{{ pay.method.upper() }} &middot; {{ pay.created_at.strftime('%d %b') }}</div>
+          </div>
+          {% if pay.status == 'confirmed' %}
+            <span class="badge badge-success">Confirmed</span>
+          {% elif pay.status == 'pending' %}
+            <span class="badge badge-warning">Pending</span>
+          {% else %}
+            <span class="badge badge-danger">Failed</span>
+          {% endif %}
+        </div>
+        {% else %}
+        <p class="text-muted fs-sm" style="text-align:center;padding:.75rem 0;">No payment records.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @media(max-width:768px) {
+    .stat-grid { grid-template-columns:1fr 1fr !important; }
+    .stat-grid + div { grid-template-columns:1fr !important; }
+  }
+</style>
+{% endblock %}

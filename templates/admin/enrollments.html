@@ -1,0 +1,74 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}Enrollments{% endblock %}
+{% block page_title %}Enrollments{% endblock %}
+
+{% block content %}
+<div class="d-flex align-center justify-between mb-2" style="flex-wrap:wrap;gap:.5rem;">
+  <div class="d-flex gap-1">
+    {% for status, label in [('', 'All'), ('pending', 'Pending'), ('active', 'Active'), ('completed', 'Completed'), ('dropped', 'Dropped')] %}
+    <a href="{{ url_for('admin.enrollments', status=status) }}"
+       class="btn btn-sm {% if status_filter == status %}btn-primary{% else %}btn-ghost{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  {% if current_user.is_admin() %}
+  <a href="{{ url_for('admin.enrollment_new') }}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> New Enrollment
+  </a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Course</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>Enrolled</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for enr in enrollments %}
+        <tr>
+          <td class="text-muted fs-sm">{{ enr.id }}</td>
+          <td>
+            <div class="fw-bold">{{ enr.student.full_name }}</div>
+            <div class="fs-sm text-muted">{{ enr.student.email }}</div>
+          </td>
+          <td>
+            <span class="badge badge-primary">{{ enr.course.code }}</span>
+            <span class="fs-sm"> {{ enr.course.title }}</span>
+          </td>
+          <td>{{ status_badge(enr.status) }}</td>
+          <td>
+            <div style="min-width:80px;">
+              <div style="height:6px;background:#eaecee;border-radius:50px;overflow:hidden;">
+                <div style="height:100%;width:{{ enr.progress }}%;background:var(--primary);border-radius:50px;transition:width .6s;"></div>
+              </div>
+              <span class="fs-sm text-muted">{{ enr.progress }}%</span>
+            </div>
+          </td>
+          <td class="fs-sm text-muted">{{ enr.enrolled_at.strftime('%d %b %Y') }}</td>
+          <td>
+            {% if current_user.is_admin() %}
+            <a href="{{ url_for('admin.enrollment_edit', enr_id=enr.id) }}" class="btn btn-xs btn-outline">
+              <i class="fas fa-edit"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">
+          <div class="empty-state"><i class="fas fa-user-graduate"></i><p>No enrollments found.</p></div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

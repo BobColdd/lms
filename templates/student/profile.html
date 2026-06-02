@@ -1,0 +1,94 @@
+{% extends "layout_app.html" %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+
+  <div class="card mb-2" style="margin-bottom:1rem;">
+    <div class="card-header">
+      <h3><i class="fas fa-user-circle" style="color:var(--primary);"></i> Personal Information</h3>
+      <a href="{{ url_for('auth.change_password') }}" class="btn btn-outline btn-sm">
+        <i class="fas fa-key"></i> Change Password
+      </a>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:1.2rem;margin-bottom:1.5rem;">
+        <div style="width:64px;height:64px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:900;flex-shrink:0;">
+          {{ current_user.full_name[:2].upper() }}
+        </div>
+        <div>
+          <h2 style="margin:0;font-size:1.25rem;">{{ current_user.full_name }}</h2>
+          <span class="badge badge-grey" style="margin-top:.3rem;">{{ current_user.role.title() }}</span>
+        </div>
+      </div>
+
+      <table style="font-size:.9rem;width:100%;">
+        <tr>
+          <td style="padding:.55rem 0;color:var(--text-muted);width:140px;font-weight:600;">Email</td>
+          <td>{{ current_user.email }}</td>
+        </tr>
+        <tr>
+          <td style="padding:.55rem 0;color:var(--text-muted);font-weight:600;">Phone</td>
+          <td>{{ current_user.phone or '—' }}</td>
+        </tr>
+        <tr>
+          <td style="padding:.55rem 0;color:var(--text-muted);font-weight:600;">National ID</td>
+          <td>{{ current_user.national_id or '—' }}</td>
+        </tr>
+        <tr>
+          <td style="padding:.55rem 0;color:var(--text-muted);font-weight:600;">Account Status</td>
+          <td>
+            {% if current_user.is_active %}
+              <span class="badge badge-success">Active</span>
+            {% else %}
+              <span class="badge badge-danger">Inactive</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:.55rem 0;color:var(--text-muted);font-weight:600;">Member Since</td>
+          <td>{{ current_user.created_at.strftime('%d %B %Y') }}</td>
+        </tr>
+        <tr>
+          <td style="padding:.55rem 0;color:var(--text-muted);font-weight:600;">Last Login</td>
+          <td>{{ current_user.last_login.strftime('%d %b %Y %H:%M') if current_user.last_login else '—' }}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="card-footer">
+      <p class="fs-sm text-muted">
+        <i class="fas fa-info-circle"></i>
+        To update your personal details, please visit the school administration office.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-school" style="color:var(--primary);"></i> School Contact</h3>
+    </div>
+    <div class="card-body">
+      <table style="font-size:.9rem;width:100%;">
+        <tr>
+          <td style="padding:.45rem 0;color:var(--text-muted);width:140px;font-weight:600;">School</td>
+          <td>{{ SCHOOL_NAME }}</td>
+        </tr>
+        <tr>
+          <td style="padding:.45rem 0;color:var(--text-muted);font-weight:600;">Location</td>
+          <td>{{ SCHOOL_LOCATION }}</td>
+        </tr>
+        <tr>
+          <td style="padding:.45rem 0;color:var(--text-muted);font-weight:600;">Email</td>
+          <td><a href="mailto:{{ SCHOOL_EMAIL }}">{{ SCHOOL_EMAIL }}</a></td>
+        </tr>
+        <tr>
+          <td style="padding:.45rem 0;color:var(--text-muted);font-weight:600;">Phone</td>
+          <td><a href="tel:{{ SCHOOL_PHONE }}">{{ SCHOOL_PHONE }}</a></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

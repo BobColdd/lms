@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import render_field, flash_messages %}
+{% block title %}Register{% endblock %}
+
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-card" style="max-width:480px;">
+    <div class="auth-card-header">
+      <div class="auth-logo">SF</div>
+      <div class="auth-school-name">{{ SCHOOL_NAME }}</div>
+      <div class="auth-school-loc">Student Registration</div>
+    </div>
+    <div class="auth-card-body">
+      {{ flash_messages() }}
+      <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+        {{ form.hidden_tag() }}
+        {{ render_field(form.full_name, placeholder='John Doe') }}
+        {{ render_field(form.email, placeholder='you@example.com') }}
+        {{ render_field(form.phone, placeholder='+254 7xx xxx xxx') }}
+        {{ render_field(form.national_id, placeholder='National ID or Student No.') }}
+        {{ render_field(form.password, placeholder='Min 8 chars, 1 uppercase, 1 number') }}
+        {{ render_field(form.confirm_password, placeholder='Repeat password') }}
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:.5rem;">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+    </div>
+    <div class="auth-card-footer">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import flash_messages %}
+{% block body %}
+
+<header class="topbar">
+  <a href="{{ url_for('main.index') }}" class="logo">
+    <div class="logo-icon">SF</div>
+    <div>
+      <div class="logo-text">{{ SCHOOL_NAME }}</div>
+      <div class="logo-sub">{{ SCHOOL_LOCATION }}</div>
+    </div>
+  </a>
+  <nav class="topbar-nav">
+    <a href="{{ url_for('main.index') }}"><i class="fas fa-home"></i> <span>Home</span></a>
+    <a href="{{ url_for('main.courses') }}"><i class="fas fa-book-open"></i> <span>Courses</span></a>
+    {% if current_user.is_authenticated %}
+      {% if current_user.is_admin() or current_user.is_instructor() %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+      {% else %}
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+      {% endif %}
+    {% else %}
+      <a href="{{ url_for('auth.login') }}">Sign In</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Register</a>
+    {% endif %}
+  </nav>
+</header>
+
+<div style="margin-top: var(--header-h);">
+  <div style="padding: .5rem 1.5rem 0; max-width:1140px; margin:0 auto;">
+    {{ flash_messages() }}
+  </div>
+  {% block content %}{% endblock %}
+</div>
+
+<footer class="site-footer">
+  <p>&copy; {{ SCHOOL_NAME }} &mdash; {{ SCHOOL_LOCATION }} | {{ SCHOOL_EMAIL }} | {{ SCHOOL_PHONE }}</p>
+</footer>
+{% endblock %}

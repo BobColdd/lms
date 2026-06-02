@@ -1,0 +1,84 @@
+{% extends "layout_public.html" %}
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;margin:0 auto;padding:2rem 1.5rem;">
+
+  <div class="breadcrumb">
+    <a href="{{ url_for('main.index') }}">Home</a>
+    <span>/</span>
+    <a href="{{ url_for('main.courses') }}">Courses</a>
+    <span>/</span>
+    <span>{{ course.title }}</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start;" class="course-detail-grid">
+
+    <!-- Left: details -->
+    <div>
+      <div class="card">
+        <div class="card-header" style="background:var(--primary);color:#fff;border-radius:var(--radius) var(--radius) 0 0;">
+          <div>
+            <span style="font-size:.72rem;opacity:.7;font-weight:700;letter-spacing:.06em;">{{ course.code }}</span>
+            <h1 style="font-size:1.4rem;color:#fff;margin:.2rem 0 0;">{{ course.title }}</h1>
+          </div>
+          {% if course.category %}<span class="badge" style="background:rgba(255,255,255,.18);color:#fff;">{{ course.category.name }}</span>{% endif %}
+        </div>
+        <div class="card-body">
+          {% if course.description %}
+          <p style="margin-bottom:1.2rem;line-height:1.7;">{{ course.description }}</p>
+          {% endif %}
+
+          {% if course.prerequisites %}
+          <h4 class="mb-1"><i class="fas fa-list-check" style="color:var(--primary);"></i> Prerequisites</h4>
+          <p class="text-muted fs-sm mb-2">{{ course.prerequisites }}</p>
+          {% endif %}
+
+          <h4 class="mb-1"><i class="fas fa-info-circle" style="color:var(--primary);"></i> Course Details</h4>
+          <table style="font-size:.88rem;width:100%;">
+            <tr><td style="padding:.4rem 0;color:var(--text-muted);width:140px;">Duration</td><td>{{ course.duration_months }} months</td></tr>
+            <tr><td style="padding:.4rem 0;color:var(--text-muted);">Schedule</td><td>{{ course.schedule or '—' }}</td></tr>
+            <tr><td style="padding:.4rem 0;color:var(--text-muted);">Class Size</td><td>Max {{ course.max_students }} students</td></tr>
+            {% if course.start_date %}<tr><td style="padding:.4rem 0;color:var(--text-muted);">Starts</td><td>{{ course.start_date.strftime('%d %b %Y') }}</td></tr>{% endif %}
+            {% if course.instructor %}<tr><td style="padding:.4rem 0;color:var(--text-muted);">Instructor</td><td>{{ course.instructor.full_name }}</td></tr>{% endif %}
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: enrol CTA -->
+    <div>
+      <div class="card" style="position:sticky;top:80px;">
+        <div class="card-body" style="text-align:center;">
+          <div style="font-size:2rem;font-weight:900;color:var(--primary);margin-bottom:.25rem;">
+            KES {{ "{:,.0f}".format(course.price) }}
+          </div>
+          <div class="text-muted fs-sm mb-2">Full course fee</div>
+          {% if course.available_slots > 0 %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:.5rem;">
+              <i class="fas fa-user-plus"></i> Enrol Now
+            </a>
+            <p class="text-muted" style="font-size:.78rem;">{{ course.available_slots }} spot(s) available</p>
+          {% else %}
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;" disabled>Course Full</button>
+            <p class="text-muted" style="font-size:.78rem;margin-top:.5rem;">Contact us to join the waitlist.</p>
+          {% endif %}
+
+          <hr style="margin:1rem 0;border:none;border-top:1px solid var(--border);">
+          <div style="font-size:.82rem;text-align:left;">
+            <p><i class="fas fa-phone" style="color:var(--primary);width:18px;"></i> {{ SCHOOL_PHONE }}</p>
+            <p style="margin-top:.4rem;"><i class="fas fa-envelope" style="color:var(--primary);width:18px;"></i> {{ SCHOOL_EMAIL }}</p>
+            <p style="margin-top:.4rem;"><i class="fas fa-map-marker-alt" style="color:var(--primary);width:18px;"></i> {{ SCHOOL_LOCATION }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media(max-width:640px) {
+    .course-detail-grid { grid-template-columns:1fr !important; }
+  }
+</style>
+{% endblock %}

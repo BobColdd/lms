@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import flash_messages %}
+{% block body %}
+<div class="app-shell">
+  {% include "partials/sidebar.html" %}
+
+  <div class="main-area">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="d-flex align-center gap-1">
+        <button id="sidebarToggle" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted);display:none;" aria-label="Menu">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="page-title">{% block page_title %}{% endblock %}</span>
+      </div>
+
+      <div class="header-user">
+        <span style="font-size:.85rem;color:var(--text-muted);">{{ current_user.full_name }}</span>
+        <div class="avatar" id="userMenuBtn" title="{{ current_user.full_name }}">
+          {{ current_user.full_name[:2].upper() }}
+        </div>
+        <div class="user-menu" id="userMenu">
+          {% if current_user.is_student() %}
+            <a href="{{ url_for('student.profile') }}"><i class="fas fa-user-circle"></i> My Profile</a>
+          {% endif %}
+          <a href="{{ url_for('auth.change_password') }}"><i class="fas fa-key"></i> Change Password</a>
+          <hr>
+          <a href="{{ url_for('auth.logout') }}" style="color:var(--accent);"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    <div style="padding: .75rem 1.5rem 0;">
+      {{ flash_messages() }}
+    </div>
+
+    <!-- Page content -->
+    <main class="page-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<style>
+  @media(max-width:768px) {
+    #sidebarToggle { display:inline-flex !important; }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "layout_app.html" %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Categories{% endblock %}
+
+{% block content %}
+<div class="d-flex align-center justify-between mb-2">
+  <span class="text-muted fs-sm">{{ categories|length }} categor(ies)</span>
+  <a href="{{ url_for('admin.category_new') }}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> New Category
+  </a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Description</th><th>Courses</th></tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td class="text-muted fs-sm">{{ cat.id }}</td>
+          <td class="fw-bold">{{ cat.name }}</td>
+          <td class="text-muted fs-sm">{{ cat.description or '—' }}</td>
+          <td>
+            <span class="badge badge-primary">{{ cat.courses.count() }}</span>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">
+          <div class="empty-state"><i class="fas fa-tags"></i><p>No categories yet.</p></div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

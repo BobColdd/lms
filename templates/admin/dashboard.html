@@ -1,0 +1,128 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stat cards -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+    <div>
+      <div class="stat-value">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red"><i class="fas fa-book-open"></i></div>
+    <div>
+      <div class="stat-value">{{ total_courses }}</div>
+      <div class="stat-label">Active Courses</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green"><i class="fas fa-user-graduate"></i></div>
+    <div>
+      <div class="stat-value">{{ total_enrollments }}</div>
+      <div class="stat-label">Active Enrollments</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon gold"><i class="fas fa-money-bill-wave"></i></div>
+    <div>
+      <div class="stat-value" style="font-size:1.2rem;">KES {{ "{:,.0f}".format(revenue) }}</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:1.2rem;">
+
+  <!-- Recent Enrollments -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-user-graduate" style="color:var(--primary);"></i> Recent Enrollments</h3>
+      <a href="{{ url_for('admin.enrollments') }}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for enr in recent_enrollments %}
+          <tr>
+            <td>{{ enr.student.full_name }}</td>
+            <td><span class="badge badge-primary">{{ enr.course.code }}</span> {{ enr.course.title }}</td>
+            <td>{{ status_badge(enr.status) }}</td>
+            <td class="text-muted fs-sm">{{ enr.enrolled_at.strftime('%d %b %Y') }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="text-muted" style="text-align:center;padding:1.5rem;">No enrollments yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+    <!-- Recent payments -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-receipt" style="color:var(--primary);"></i> Recent Payments</h3>
+        <a href="{{ url_for('admin.payments') }}" class="btn btn-outline btn-sm">View All</a>
+      </div>
+      <div class="card-body" style="padding:.75rem;">
+        {% for pay in recent_payments %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div class="fw-bold fs-sm">{{ pay.student.full_name }}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">{{ pay.method.upper() }} &mdash; {{ pay.created_at.strftime('%d %b') }}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="fw-bold fs-sm">KES {{ "{:,.0f}".format(pay.amount) }}</div>
+            {{ status_badge(pay.status) }}
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted fs-sm" style="text-align:center;padding:.75rem 0;">No payments recorded.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-bullhorn" style="color:var(--primary);"></i> Announcements</h3>
+        <a href="{{ url_for('admin.announcement_new') }}" class="btn btn-primary btn-sm">+ New</a>
+      </div>
+      <div class="card-body" style="padding:.75rem;">
+        {% for ann in announcements %}
+        <div style="padding:.55rem 0;border-bottom:1px solid var(--border);">
+          <div class="fw-bold fs-sm">{{ ann.title }}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">{{ ann.created_at.strftime('%d %b %Y') }}</div>
+        </div>
+        {% else %}
+        <p class="text-muted fs-sm" style="text-align:center;padding:.75rem 0;">No announcements.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @media(max-width:768px) {
+    .stat-grid { grid-template-columns: 1fr 1fr !important; }
+    .stat-grid + div { grid-template-columns: 1fr !important; }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}Courses{% endblock %}
+{% block page_title %}Courses{% endblock %}
+
+{% block content %}
+<div class="d-flex align-center justify-between mb-2">
+  <span class="text-muted fs-sm">{{ courses|length }} course(s)</span>
+  {% if current_user.is_admin() %}
+  <a href="{{ url_for('admin.course_new') }}" class="btn btn-primary btn-sm">
+    <i class="fas fa-plus"></i> New Course
+  </a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Duration</th>
+          <th>Price (KES)</th>
+          <th>Enrolled</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for course in courses %}
+        <tr>
+          <td><span class="badge badge-primary">{{ course.code }}</span></td>
+          <td class="fw-bold">{{ course.title }}</td>
+          <td class="text-muted fs-sm">{{ course.category.name if course.category else '—' }}</td>
+          <td class="text-muted fs-sm">{{ course.duration_months }} mo.</td>
+          <td class="fw-bold">{{ "{:,.0f}".format(course.price) }}</td>
+          <td>
+            <span class="{% if course.enrolled_count >= course.max_students %}text-accent{% else %}text-muted{% endif %} fs-sm">
+              {{ course.enrolled_count }} / {{ course.max_students }}
+            </span>
+          </td>
+          <td>
+            {% if course.is_active %}
+              <span class="badge badge-success">Active</span>
+            {% else %}
+              <span class="badge badge-grey">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('main.course_detail', course_id=course.id) }}" class="btn btn-xs btn-ghost" title="View">
+              <i class="fas fa-eye"></i>
+            </a>
+            {% if current_user.is_admin() %}
+            <a href="{{ url_for('admin.course_edit', course_id=course.id) }}" class="btn btn-xs btn-outline" title="Edit">
+              <i class="fas fa-edit"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">
+          <div class="empty-state"><i class="fas fa-book"></i><p>No courses yet.</p></div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

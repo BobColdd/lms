@@ -1,0 +1,90 @@
+{% extends "layout_public.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <h1 class="serif">Empower Your Future with Technology</h1>
+  <p>Practical computing courses designed for today's digital economy.<br>
+     Affordable, certified, and taught by experienced instructors.</p>
+  <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+    <a href="{{ url_for('main.courses') }}" class="btn btn-outline" style="border-color:#fff;color:#fff;">
+      <i class="fas fa-book-open"></i> View Courses
+    </a>
+    <a href="{{ url_for('auth.register') }}" class="btn" style="background:#fff;color:var(--primary);">
+      <i class="fas fa-user-plus"></i> Enrol Now
+    </a>
+  </div>
+</section>
+
+<div style="max-width:1140px;margin:0 auto;padding:2rem 1.5rem;">
+
+  <!-- Announcements -->
+  {% if announcements %}
+  <section class="mb-3">
+    <h2 class="mb-2" style="font-size:1.2rem;"><i class="fas fa-bullhorn" style="color:var(--primary);"></i> Latest Announcements</h2>
+    {% for ann in announcements %}
+    <div class="alert alert-info mb-1">
+      <div>
+        <strong>{{ ann.title }}</strong>
+        <div class="fs-sm text-muted">{{ ann.body[:200] }}{% if ann.body|length > 200 %}...{% endif %}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.2rem;">{{ ann.created_at.strftime('%d %b %Y') }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- Courses preview -->
+  <section>
+    <div class="d-flex align-center justify-between mb-2">
+      <h2 style="font-size:1.2rem;">Featured Courses</h2>
+      <a href="{{ url_for('main.courses') }}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <div class="course-grid">
+      {% for course in courses %}
+      <div class="course-card">
+        <div class="course-card-header">
+          <div class="code">{{ course.code }}</div>
+          <div class="title">{{ course.title }}</div>
+        </div>
+        <div class="course-card-body">
+          <p>{{ course.description[:120] }}{% if course.description and course.description|length > 120 %}...{% endif %}</p>
+          <div class="course-meta">
+            <span><i class="fas fa-clock"></i> {{ course.duration_months }} months</span>
+            <span><i class="fas fa-users"></i> {{ course.max_students }} slots</span>
+            {% if course.schedule %}<span><i class="fas fa-calendar"></i> {{ course.schedule }}</span>{% endif %}
+          </div>
+          <div class="course-price">
+            KES {{ "{:,.0f}".format(course.price) }}
+            <span>/ full course</span>
+          </div>
+        </div>
+        <div class="course-card-footer">
+          <a href="{{ url_for('main.course_detail', course_id=course.id) }}" class="btn btn-ghost btn-sm">Details</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Enrol</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- About strip -->
+  <section style="margin-top:3rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;text-align:center;">
+    {% set highlights = [
+      ('fas fa-map-marker-alt', 'Location', 'Kiptere, Kericho County'),
+      ('fas fa-certificate', 'Certified', 'Government-accredited programs'),
+      ('fas fa-laptop', 'Hands-on', 'Practical computer lab training'),
+      ('fas fa-phone', 'Contact', SCHOOL_PHONE),
+    ] %}
+    {% for icon, title, text in highlights %}
+    <div style="padding:1.5rem 1rem;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);">
+      <i class="{{ icon }}" style="font-size:1.5rem;color:var(--primary);margin-bottom:.5rem;display:block;"></i>
+      <strong style="display:block;margin-bottom:.25rem;">{{ title }}</strong>
+      <span class="text-muted fs-sm">{{ text }}</span>
+    </div>
+    {% endfor %}
+  </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}My Payments{% endblock %}
+{% block page_title %}My Payments{% endblock %}
+
+{% block content %}
+
+<div class="card mb-2" style="margin-bottom:1rem;">
+  <div class="card-body" style="padding:.9rem 1.2rem;">
+    <p class="fs-sm text-muted">
+      <i class="fas fa-info-circle" style="color:var(--primary);"></i>
+      To make a payment, visit the school accounts office or M-Pesa Paybill (details provided at registration).
+      Bring your enrollment reference number. Online payment via M-Pesa Daraja will be available soon.
+    </p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-receipt" style="color:var(--primary);"></i> Payment History</h3>
+    <span class="text-muted fs-sm">{{ payments|length }} record(s)</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Amount (KES)</th>
+          <th>Method</th>
+          <th>Reference</th>
+          <th>Course</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pay in payments %}
+        <tr>
+          <td class="text-muted fs-sm">{{ pay.id }}</td>
+          <td class="fw-bold">{{ "{:,.2f}".format(pay.amount) }}</td>
+          <td>
+            <span class="badge
+              {% if pay.method == 'mpesa' %}badge-success
+              {% elif pay.method == 'bank' %}badge-primary
+              {% else %}badge-grey{% endif %}">
+              {{ pay.method.upper() }}
+            </span>
+          </td>
+          <td class="fs-sm text-muted">{{ pay.reference or '—' }}</td>
+          <td class="fs-sm">
+            {% if pay.enrollment %}
+              <span class="badge badge-primary">{{ pay.enrollment.course.code }}</span>
+              {{ pay.enrollment.course.title }}
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ status_badge(pay.status) }}</td>
+          <td class="fs-sm text-muted">{{ pay.created_at.strftime('%d %b %Y') }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">
+          <div class="empty-state">
+            <i class="fas fa-receipt"></i>
+            <p>No payment records found.</p>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if payments %}
+  <div class="card-footer">
+    <span class="fs-sm text-muted">
+      Total confirmed:
+      <strong style="color:var(--success);">
+        KES {{ "{:,.2f}".format(payments | selectattr('status','equalto','confirmed') | map(attribute='amount') | sum) }}
+      </strong>
+    </span>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "layout_public.html" %}
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+<div style="max-width:1140px;margin:0 auto;padding:2rem 1.5rem;">
+
+  <div class="d-flex align-center justify-between mb-3" style="flex-wrap:wrap;gap:.75rem;">
+    <div>
+      <h1 style="font-size:1.6rem;">Computing Courses</h1>
+      <p class="text-muted fs-sm">Short courses from 2 to 6 months — Kiptere, Kericho</p>
+    </div>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+      <i class="fas fa-user-plus"></i> Register & Enrol
+    </a>
+  </div>
+
+  <!-- Category filter chips -->
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+    <a href="{{ url_for('main.courses') }}" class="badge badge-primary" style="padding:.35rem .8rem;text-decoration:none;">All</a>
+    {% for cat in categories %}
+    <a href="{{ url_for('main.courses') }}?cat={{ cat.id }}" class="badge badge-grey" style="padding:.35rem .8rem;text-decoration:none;">{{ cat.name }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="course-grid">
+    {% for course in courses %}
+    <div class="course-card">
+      <div class="course-card-header" style="background:{% if loop.index % 3 == 0 %}#154360{% elif loop.index % 3 == 2 %}#1a5276{% else %}#21618c{% endif %};">
+        <div class="code">{{ course.code }}</div>
+        <div class="title">{{ course.title }}</div>
+      </div>
+      <div class="course-card-body">
+        {% if course.category %}<span class="badge badge-primary mb-1">{{ course.category.name }}</span>{% endif %}
+        <p style="margin-top:.4rem;">{{ course.description[:140] }}{% if course.description and course.description|length > 140 %}...{% endif %}</p>
+        <div class="course-meta">
+          <span><i class="fas fa-hourglass-half"></i> {{ course.duration_months }} months</span>
+          <span><i class="fas fa-users"></i> {{ course.enrolled_count }}/{{ course.max_students }}</span>
+          {% if course.schedule %}<span><i class="fas fa-calendar-alt"></i> {{ course.schedule }}</span>{% endif %}
+        </div>
+        <div class="course-price">
+          KES {{ "{:,.0f}".format(course.price) }}
+          <span>total</span>
+        </div>
+        {% if course.available_slots <= 0 %}
+          <span class="badge badge-danger mt-1">Full</span>
+        {% elif course.available_slots <= 5 %}
+          <span class="badge badge-warning mt-1">{{ course.available_slots }} slots left</span>
+        {% endif %}
+      </div>
+      <div class="course-card-footer">
+        <a href="{{ url_for('main.course_detail', course_id=course.id) }}" class="btn btn-ghost btn-sm">
+          <i class="fas fa-info-circle"></i> Details
+        </a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Enrol</a>
+      </div>
+    </div>
+    {% else %}
+    <p class="text-muted">No courses available at the moment.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

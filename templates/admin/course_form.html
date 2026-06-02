@@ -1,0 +1,50 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import render_field %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;">
+  <div class="breadcrumb">
+    <a href="{{ url_for('admin.courses') }}">Courses</a>
+    <span>/</span>
+    <span>{{ title }}</span>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-book-open"></i> {{ title }}</h3></div>
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-row">
+          {{ render_field(form.title) }}
+          {{ render_field(form.code, hint='e.g. WDD-101') }}
+        </div>
+        {{ render_field(form.description) }}
+        <div class="form-row">
+          {{ render_field(form.duration_months, hint='2 to 6 months only') }}
+          {{ render_field(form.price, hint='Full course fee in KES') }}
+          {{ render_field(form.max_students) }}
+        </div>
+        <div class="form-row">
+          {{ render_field(form.category_id) }}
+          {{ render_field(form.instructor_id) }}
+        </div>
+        {{ render_field(form.schedule, hint='e.g. Mon/Wed/Fri 8:00–10:00AM') }}
+        {{ render_field(form.prerequisites) }}
+        <div class="form-row">
+          {{ render_field(form.start_date) }}
+          {{ render_field(form.end_date) }}
+        </div>
+        {{ render_field(form.is_active, placeholder='Course is active and accepting enrollments') }}
+
+        <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> {{ form.submit.label.text }}
+          </button>
+          <a href="{{ url_for('admin.courses') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

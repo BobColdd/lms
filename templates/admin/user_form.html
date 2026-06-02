@@ -1,0 +1,43 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import render_field %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+  <div class="breadcrumb">
+    <a href="{{ url_for('admin.users') }}">Users</a>
+    <span>/</span>
+    <span>{{ title }}</span>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-user-edit"></i> {{ title }}</h3></div>
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-row">
+          {{ render_field(form.full_name) }}
+          {{ render_field(form.email) }}
+        </div>
+        <div class="form-row">
+          {{ render_field(form.phone) }}
+          {{ render_field(form.national_id) }}
+        </div>
+        <div class="form-row">
+          {{ render_field(form.role) }}
+          <div class="form-group" style="display:flex;align-items:center;padding-top:1.7rem;">
+            {{ render_field(form.is_active, placeholder='Account is active') }}
+          </div>
+        </div>
+        {{ render_field(form.password, hint='Leave blank to keep existing password (new users default: Temp@1234)') }}
+        <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> {{ form.submit.label.text }}
+          </button>
+          <a href="{{ url_for('admin.users') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

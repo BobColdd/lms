@@ -1,0 +1,43 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import render_field %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:560px;">
+  <div class="breadcrumb">
+    <a href="{{ url_for('admin.payments') }}">Payments</a>
+    <span>/</span>
+    <span>{{ title }}</span>
+  </div>
+  <div class="card">
+    <div class="card-header"><h3><i class="fas fa-money-bill-wave"></i> {{ title }}</h3></div>
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        {{ render_field(form.student_id) }}
+        {{ render_field(form.enrollment_id, hint='Select the course enrollment this payment is for (optional)') }}
+        <div class="form-row">
+          {{ render_field(form.amount) }}
+          {{ render_field(form.method) }}
+        </div>
+        {{ render_field(form.reference, hint='M-Pesa transaction code, bank receipt no., etc.') }}
+        {{ render_field(form.status) }}
+        {{ render_field(form.notes) }}
+        <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Payment</button>
+          <a href="{{ url_for('admin.payments') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="card mt-2" style="margin-top:1rem;">
+    <div class="card-body" style="padding:.9rem 1.2rem;">
+      <p class="fs-sm text-muted">
+        <i class="fas fa-info-circle" style="color:var(--primary);"></i>
+        <strong>Note:</strong> M-Pesa Daraja integration is not yet active. Record payments manually after verifying the M-Pesa message or bank slip. Confirming a payment will automatically activate a pending enrollment.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
