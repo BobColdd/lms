@@ -1,0 +1,134 @@
+{% extends "layout_app.html" %}
+{% block title %}Course Materials{% endblock %}
+{% block page_title %}Course Materials{% endblock %}
+
+{% block content %}
+
+{% if not materials and not courses %}
+<div class="empty-state card" style="padding:3rem;">
+  <i class="fas fa-folder-open"></i>
+  <p>You need an active enrollment to access course materials.</p>
+  <a href="{{ url_for('student.browse_courses') }}"
+     class="btn btn-primary btn-sm" style="margin-top:.75rem;">Browse Courses</a>
+</div>
+{% else %}
+
+<!-- Filters -->
+<div class="card mb-2" style="margin-bottom:1rem;">
+  <div class="card-body" style="padding:.8rem 1rem;">
+    <form method="GET" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end;">
+      <div class="form-group" style="margin:0;flex:1;min-width:150px;">
+        <label class="form-label">Course</label>
+        <select name="course_id" class="form-control">
+          <option value="">All My Courses</option>
+          {% for course in courses %}
+          <option value="{{ course.id }}" {% if selected_course == course.id|string %}selected{% endif %}>
+            {{ course.code }} – {{ course.title }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;min-width:130px;">
+        <label class="form-label">Type</label>
+        <select name="type" class="form-control">
+          <option value="">All Types</option>
+          <option value="notes" {% if selected_type == 'notes' %}selected{% endif %}>Notes</option>
+          <option value="cat"   {% if selected_type == 'cat'   %}selected{% endif %}>CAT</option>
+          <option value="exam"  {% if selected_type == 'exam'  %}selected{% endif %}>Exam</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="fas fa-filter"></i> Filter
+      </button>
+      <a href="{{ url_for('student.materials') }}" class="btn btn-ghost btn-sm">Clear</a>
+    </form>
+  </div>
+</div>
+
+<!-- Material cards -->
+<div style="display:flex;flex-direction:column;gap:.75rem;">
+  {% for mat in materials %}
+  <div class="material-card">
+    <div class="material-icon {% if mat.file_type == 'pdf' %}pdf{% else %}video{% endif %}">
+      <i class="fas fa-{% if mat.file_type == 'pdf' %}file-pdf{% else %}play-circle{% endif %}"></i>
+    </div>
+
+    <div style="flex:1;min-width:0;">
+      <div class="fw-bold" style="font-size:.92rem;">{{ mat.title }}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.25rem;align-items:center;">
+        <span class="badge
+          {% if mat.material_type == 'notes' %}badge-primary
+          {% elif mat.material_type == 'cat'  %}badge-warning
+          {% else %}badge-danger{% endif %}">
+          {{ mat.material_type.upper() }}
+        </span>
+        <span class="badge badge-grey">{{ mat.file_type.upper() }}</span>
+        <span class="fs-sm text-muted">{{ mat.course.code }}</span>
+      </div>
+      {% if mat.description %}
+      <div class="fs-sm text-muted" style="margin-top:.2rem;">
+        {{ mat.description[:90] }}{% if mat.description|length > 90 %}...{% endif %}
+      </div>
+      {% endif %}
+      <div class="fs-sm text-muted" style="margin-top:.2rem;">
+        {{ mat.created_at.strftime('%d %b %Y') }}
+      </div>
+    </div>
+
+    <!-- View button — opens inline viewer -->
+    <div style="flex-shrink:0;">
+      <a href="#" onclick="openViewer('{{ url_for('instructor.view_material', mat_id=mat.id) }}',
+                                       '{{ mat.file_type }}', '{{ mat.title|e }}')"
+         class="btn btn-outline btn-sm">
+        <i class="fas fa-eye"></i> View
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state card" style="padding:2.5rem;">
+    <i class="fas fa-folder-open"></i>
+    <p>No materials available yet. Check back later.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Viewer modal -->
+<div id="viewerModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);padding:1rem;overflow:auto;">
+  <div style="background:#fff;border-radius:var(--radius-lg);max-width:900px;margin:0 auto;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--border);">
+      <span class="fw-bold fs-sm" id="viewerTitle"></span>
+      <button onclick="closeViewer()" class="btn btn-ghost btn-sm">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+    <div id="viewerBody" style="padding:.5rem;"></div>
+  </div>
+</div>
+
+<script>
+function openViewer(url, type, title) {
+  document.getElementById('viewerTitle').textContent = title;
+  const body = document.getElementById('viewerBody');
+  if (type === 'pdf') {
+    body.innerHTML = `<iframe src="${url}" class="pdf-viewer" style="width:100%;height:75vh;border:none;"></iframe>`;
+  } else {
+    body.innerHTML = `<video controls class="video-player" style="width:100%;max-height:75vh;">
+      <source src="${url}" type="video/mp4">
+      Your browser does not support video playback.
+    </video>`;
+  }
+  document.getElementById('viewerModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeViewer() {
+  document.getElementById('viewerModal').style.display = 'none';
+  document.getElementById('viewerBody').innerHTML = '';
+  document.body.style.overflow = '';
+}
+// Close on backdrop click
+document.getElementById('viewerModal').addEventListener('click', function(e) {
+  if (e.target === this) closeViewer();
+});
+</script>
+{% endblock %}

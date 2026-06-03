@@ -1,0 +1,108 @@
+{% extends "layout_app.html" %}
+{% block title %}Upload Material{% endblock %}
+{% block page_title %}Upload Material{% endblock %}
+
+{% block content %}
+<div style="max-width:540px;">
+  <div class="breadcrumb">
+    <a href="{{ url_for('instructor.materials') }}">Course Materials</a>
+    <span>/</span><span>Upload</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-upload" style="color:var(--primary);"></i> Upload Course Material</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label class="form-label">Course <span style="color:var(--accent);">*</span></label>
+          <select name="course_id" class="form-control" required>
+            <option value="">-- Select Course --</option>
+            {% for course in courses %}
+            <option value="{{ course.id }}">{{ course.code }} – {{ course.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Material Type <span style="color:var(--accent);">*</span></label>
+          <select name="material_type" class="form-control" required>
+            <option value="">-- Select Type --</option>
+            <option value="notes">Notes</option>
+            <option value="cat">CAT (Continuous Assessment Test)</option>
+            <option value="exam">Exam</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Title <span style="color:var(--accent);">*</span></label>
+          <input type="text" name="title" class="form-control"
+                 placeholder="e.g. Week 3 Notes — HTML Forms" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="3"
+                    placeholder="Brief description (optional)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">File <span style="color:var(--accent);">*</span></label>
+          <input type="file" name="file" class="form-control"
+                 accept=".pdf,.mp4" required id="fileInput">
+          <div class="form-hint">PDF or MP4 only. Maximum 100 MB.</div>
+          <div id="fileInfo" style="display:none;margin-top:.4rem;" class="fs-sm text-muted"></div>
+        </div>
+
+        <!-- Upload progress bar -->
+        <div id="progressWrap" style="display:none;margin-bottom:1rem;">
+          <div class="fs-sm text-muted mb-1">Uploading…</div>
+          <div style="height:8px;background:#eaecee;border-radius:50px;overflow:hidden;">
+            <div id="progressBar"
+                 style="height:100%;width:0;background:var(--primary);border-radius:50px;transition:width .3s;"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:.5rem;">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <i class="fas fa-upload"></i> Upload
+          </button>
+          <a href="{{ url_for('instructor.materials') }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const fileInput  = document.getElementById('fileInput');
+  const fileInfo   = document.getElementById('fileInfo');
+  const submitBtn  = document.getElementById('submitBtn');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar  = document.getElementById('progressBar');
+
+  fileInput.addEventListener('change', () => {
+    const f = fileInput.files[0];
+    if (f) {
+      const mb = (f.size / 1048576).toFixed(2);
+      fileInfo.style.display = 'block';
+      fileInfo.textContent = `${f.name} — ${mb} MB`;
+    }
+  });
+
+  fileInput.closest('form').addEventListener('submit', () => {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
+    progressWrap.style.display = 'block';
+    let w = 0;
+    const iv = setInterval(() => {
+      w = Math.min(w + Math.random() * 12, 90);
+      progressBar.style.width = w + '%';
+      if (w >= 90) clearInterval(iv);
+    }, 300);
+  });
+</script>
+{% endblock %}

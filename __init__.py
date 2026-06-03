@@ -34,10 +34,14 @@ def create_app(config_name='default'):
     from routes.admin import admin_bp
     from routes.student import student_bp
     from routes.main import main_bp
+    from routes.certificates import cert_bp
+    from routes.instructor import instructor_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(student_bp, url_prefix='/student')
+    app.register_blueprint(cert_bp, url_prefix='/admin')
+    app.register_blueprint(instructor_bp, url_prefix='/instructor')
     app.register_blueprint(main_bp)
 
     # Inject config into templates

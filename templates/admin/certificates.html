@@ -1,0 +1,191 @@
+{% extends "layout_app.html" %}
+{% from "partials/macros.html" import status_badge %}
+{% block title %}Certificates{% endblock %}
+{% block page_title %}Certificates{% endblock %}
+
+{% block content %}
+
+<!-- Info banner -->
+<div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;border-radius:var(--radius);padding:1.1rem 1.4rem;margin-bottom:1.4rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+  <i class="fas fa-certificate" style="font-size:2rem;opacity:.85;"></i>
+  <div>
+    <div style="font-weight:700;font-size:1rem;">Certificate Generator</div>
+    <div style="font-size:.83rem;opacity:.85;">
+      Select one or more students and click <strong>Generate Certificate(s)</strong>.
+      Each certificate is a professional A4-landscape PDF ready for signing and stamping.
+      Single certificates open in a browser tab; bulk downloads come as a ZIP file.
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-2" style="margin-bottom:1rem;">
+  <div class="card-body" style="padding:.85rem 1.2rem;">
+    <form method="GET" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;">
+      <div class="form-group" style="margin:0;flex:1;min-width:180px;">
+        <label class="form-label">Search Student</label>
+        <input type="text" name="search" value="{{ search }}"
+               class="form-control" placeholder="Name or email…">
+      </div>
+      <div class="form-group" style="margin:0;flex:1;min-width:180px;">
+        <label class="form-label">Filter by Course</label>
+        <select name="course_id" class="form-control">
+          <option value="">All Courses</option>
+          {% for course in courses %}
+          <option value="{{ course.id }}" {% if selected_course == course.id|string %}selected{% endif %}>
+            {{ course.code }} – {{ course.title }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+        <a href="{{ url_for('cert.certificate_list') }}" class="btn btn-ghost btn-sm">
+          <i class="fas fa-times"></i> Clear
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Bulk form -->
+<form method="POST" action="{{ url_for('cert.generate_bulk') }}" id="bulkForm">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <input type="checkbox" id="selectAll" title="Select all"
+               style="width:16px;height:16px;cursor:pointer;">
+        <h3 style="margin:0;"><i class="fas fa-user-graduate" style="color:var(--primary);"></i>
+          Enrolled Students
+          <span class="badge badge-grey" style="font-size:.78rem;margin-left:.3rem;">{{ enrollments|length }}</span>
+        </h3>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" id="bulkBtn" disabled>
+        <i class="fas fa-download"></i> Download Selected as ZIP
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;"></th>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Status</th>
+            <th>Grade</th>
+            <th>Enrolled</th>
+            <th>Completed</th>
+            <th style="width:120px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for enr in enrollments %}
+          <tr>
+            <td>
+              <input type="checkbox" name="enr_ids" value="{{ enr.id }}"
+                     class="row-check" style="width:16px;height:16px;cursor:pointer;">
+            </td>
+            <td>
+              <div class="fw-bold">{{ enr.student.full_name }}</div>
+              <div class="fs-sm text-muted">{{ enr.student.email }}</div>
+            </td>
+            <td>
+              <span class="badge badge-primary">{{ enr.course.code }}</span>
+              <span class="fs-sm"> {{ enr.course.title }}</span>
+              <div class="fs-sm text-muted">{{ enr.course.duration_months }} months</div>
+            </td>
+            <td>{{ status_badge(enr.status) }}</td>
+            <td>
+              {% if enr.grade %}
+                <span class="badge badge-success">{{ enr.grade }}</span>
+              {% else %}
+                <span class="text-muted fs-sm">—</span>
+              {% endif %}
+            </td>
+            <td class="fs-sm text-muted">{{ enr.enrolled_at.strftime('%d %b %Y') }}</td>
+            <td class="fs-sm text-muted">
+              {% if enr.completion_date %}
+                {{ enr.completion_date.strftime('%d %b %Y') }}
+              {% else %}
+                <span style="color:var(--warning);">Not set</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('cert.generate', enr_id=enr.id) }}"
+                 target="_blank"
+                 class="btn btn-outline btn-sm"
+                 title="Preview & Print Certificate">
+                <i class="fas fa-file-pdf"></i> Generate
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state" style="padding:2.5rem;">
+                <i class="fas fa-certificate"></i>
+                <p>No enrollments found matching your filters.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if enrollments %}
+    <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+      <span class="fs-sm text-muted" id="selectedCount">0 student(s) selected</span>
+      <button type="submit" class="btn btn-primary btn-sm" id="bulkBtn2" disabled>
+        <i class="fas fa-download"></i> Download Selected as ZIP
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</form>
+
+<!-- Usage notes -->
+<div class="card" style="margin-top:1rem;">
+  <div class="card-body" style="padding:.9rem 1.2rem;">
+    <h4 style="margin-bottom:.6rem;font-size:.9rem;"><i class="fas fa-info-circle" style="color:var(--primary);"></i> How to use</h4>
+    <ul style="font-size:.83rem;color:var(--text-muted);line-height:1.8;margin-left:1.2rem;">
+      <li>Click <strong>Generate</strong> next to a student to preview their certificate in a new tab — then use <strong>Ctrl+P</strong> or browser print to print it.</li>
+      <li>Tick multiple students and click <strong>Download Selected as ZIP</strong> to get all certificates in one zip file.</li>
+      <li>Print on A4 paper in <strong>landscape orientation</strong> for best results.</li>
+      <li>After printing, have the <strong>Principal / Director sign</strong> the signature line and apply the <strong>official school stamp</strong> in the circle provided.</li>
+      <li>To set a completion date or grade for a student, edit their enrollment under <a href="{{ url_for('admin.enrollments') }}">Enrollments</a>.</li>
+    </ul>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const selectAll   = document.getElementById('selectAll');
+  const checkboxes  = document.querySelectorAll('.row-check');
+  const bulkBtn     = document.getElementById('bulkBtn');
+  const bulkBtn2    = document.getElementById('bulkBtn2');
+  const countLabel  = document.getElementById('selectedCount');
+
+  function updateBulk() {
+    const checked = document.querySelectorAll('.row-check:checked').length;
+    const disabled = checked === 0;
+    if (bulkBtn)  bulkBtn.disabled  = disabled;
+    if (bulkBtn2) bulkBtn2.disabled = disabled;
+    if (countLabel) countLabel.textContent = `${checked} student(s) selected`;
+  }
+
+  selectAll.addEventListener('change', () => {
+    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+    updateBulk();
+  });
+
+  checkboxes.forEach(cb => cb.addEventListener('change', updateBulk));
+</script>
+{% endblock %}

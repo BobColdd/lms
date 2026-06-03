@@ -32,9 +32,7 @@ class User(UserMixin, db.Model):
                                    foreign_keys='Enrollment.student_id')
     instructed_courses = db.relationship('Course', backref='instructor', lazy='dynamic',
                                           foreign_keys='Course.instructor_id')
-    
-    payments = db.relationship('Payment', backref='student', lazy='dynamic',
-                            foreign_keys='Payment.student_id')
+    payments = db.relationship('Payment', backref='student', lazy='dynamic')
     announcements = db.relationship('Announcement', backref='author', lazy='dynamic')
 
     def set_password(self, password):
@@ -206,3 +204,32 @@ class AuditLog(db.Model):
 
     def __repr__(self):
         return f'<AuditLog {self.action} by user {self.user_id}>'
+
+
+class MaterialType:
+    NOTES = 'notes'
+    CAT   = 'cat'
+    EXAM  = 'exam'
+
+
+class CourseMaterial(db.Model):
+    __tablename__ = 'course_materials'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    course_id   = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('users.id'),   nullable=False)
+    title       = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    material_type = db.Column(db.String(20), nullable=False)   # notes | cat | exam
+    filename    = db.Column(db.String(255), nullable=False)    # stored filename
+    original_filename = db.Column(db.String(255), nullable=False)
+    file_type   = db.Column(db.String(10), nullable=False)     # pdf | mp4
+    file_size   = db.Column(db.Integer, nullable=True)         # bytes
+    is_active   = db.Column(db.Boolean, default=True)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    course   = db.relationship('Course',  backref='materials', lazy=True)
+    uploader = db.relationship('User',    foreign_keys=[uploaded_by], lazy=True)
+
+    def __repr__(self):
+        return f'<CourseMaterial {self.title}>'
